@@ -75,5 +75,4 @@ class Terraform:
         return outputs
 
     def destroy(self):
-        print(self.retain)
-        # subprocess.run("terraform destroy -auto-approve", shell=True)
+        subprocess.run("terraform destroy -auto-approve", shell=True)
