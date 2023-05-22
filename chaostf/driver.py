@@ -36,15 +36,21 @@ class Terraform:
     def __init__(self):
         super().__init__()
         self.retain = False
+        self.silent = False
         self.args = {}
 
-    def configure(self, retain: bool = False, args: Dict = None):
+    def configure(self, retain: bool = False, silent: bool = False, args: Dict = None):
         self.retain = retain
+        self.silent = silent
         self.args = args or {}
 
     def terraform_init(self):
         if not os.path.exists(".terraform"):
-            result = subprocess.run("terraform init", shell=True)
+            result = subprocess.run(
+                "terraform init",
+                capture_output=self.silent,
+                shell=True,
+            )
             if result.returncode != 0:
                 raise InterruptExecution("Failed to initialize terraform")
 
@@ -60,7 +66,11 @@ class Terraform:
             var_overrides.append(f"-var {key}='{string_value}'")
         opts = " ".join(var_overrides)
 
-        result = subprocess.run(f"terraform apply {opts} -auto-approve", shell=True)
+        result = subprocess.run(
+            f"terraform apply {opts} -auto-approve",
+            capture_output=self.silent,
+            shell=True,
+        )
         if result.returncode != 0:
             raise InterruptExecution("Failed to apply terraform stack terraform")
 
@@ -75,4 +85,8 @@ class Terraform:
         return outputs
 
     def destroy(self):
-        subprocess.run("terraform destroy -auto-approve", shell=True)
+        subprocess.run(
+            "terraform destroy -auto-approve",
+            capture_output=self.silent,
+            shell=True,
+        )

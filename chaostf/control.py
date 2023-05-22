@@ -35,10 +35,11 @@ def configure_control(
         configuration.pop(f"{VAR_NAME_PREFIX}{key}")
 
     retain = configuration.get("tf_conf__retain", False)
+    silent = configuration.get("tf_conf__silent", False)
     logger.info("Terraform: retain stack after experiment completion: %s", str(retain))
 
     driver = Terraform()
-    driver.configure(retain=bool(retain), args=tf_vars)
+    driver.configure(retain=bool(retain), silent=bool(silent), args=tf_vars)
     driver.terraform_init()
 
 
@@ -55,8 +56,10 @@ def before_experiment_control(
     configuration and secrets have been loaded.
     """
     driver = Terraform()
+    logger.info("Terraform: creating required resources for experiment")
     driver.apply()
     for key, value in driver.output().items():
+        logger.info("Terraform: reading configuration value for [%s]", key)
         configuration[f"tf_out__{key}"] = value.get("value")
 
 
@@ -69,6 +72,7 @@ def after_experiment_control(
 ):
     driver = Terraform()
     if not driver.retain:
+        logger.info("Terraform: removing experiment resources")
         driver.destroy()
     else:
         logger.info(
