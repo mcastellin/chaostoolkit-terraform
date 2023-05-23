@@ -16,9 +16,13 @@ from logzero import logger
 from .driver import Terraform
 
 VAR_NAME_PREFIX = "tf__"
+CONFIG_PREFIX = "tf_conf__"
+EXPORT_VAR_PREFIX = "tf_out__"
 
 
 def configure_control(
+    silent: bool = True,
+    retain: bool = False,
     configuration: Configuration = None,
     secrets: Secrets = None,
     settings: Settings = None,
@@ -34,12 +38,17 @@ def configure_control(
     for key, _ in tf_vars.items():
         configuration.pop(f"{VAR_NAME_PREFIX}{key}")
 
-    retain = configuration.get("tf_conf__retain", False)
-    silent = configuration.get("tf_conf__silent", False)
-    logger.info("Terraform: retain stack after experiment completion: %s", str(retain))
+    params = {
+        "retain": bool(configuration.get(f"{CONFIG_PREFIX}retain", retain)),
+        "silent": bool(configuration.get(f"{CONFIG_PREFIX}silent", silent)),
+    }
+    logger.info(
+        "Terraform: retain stack after experiment completion: %s",
+        str(params.get("retain")),
+    )
 
     driver = Terraform()
-    driver.configure(retain=bool(retain), silent=bool(silent), args=tf_vars)
+    driver.configure(**params, args=tf_vars)
     driver.terraform_init()
 
 
@@ -60,7 +69,7 @@ def before_experiment_control(
     driver.apply()
     for key, value in driver.output().items():
         logger.info("Terraform: reading configuration value for [%s]", key)
-        configuration[f"tf_out__{key}"] = value.get("value")
+        configuration[f"{EXPORT_VAR_PREFIX}{key}"] = value.get("value")
 
 
 def after_experiment_control(
