@@ -19,7 +19,7 @@ from chaoslib.types import (
 
 
 def singleton(cls):
-    """Creates a singleton wrapper for any calss"""
+    """Creates a singleton wrapper for any class"""
 
     @functools.wraps(cls)
     def wrapper_singleton(*args, **kwargs):
@@ -37,17 +37,39 @@ class Terraform:
         super().__init__()
         self.retain = False
         self.silent = False
+        self.chdir = None
         self.args = {}
 
-    def configure(self, retain: bool = False, silent: bool = False, args: Dict = None):
+    def configure(
+        self,
+        retain: bool = False,
+        silent: bool = False,
+        chdir: str = None,
+        args: Dict = None,
+    ):
         self.retain = retain
         self.silent = silent
+        self.chdir = chdir
         self.args = args or {}
+
+    @property
+    def _terraform(self):
+        if self.chdir:
+            if not os.path.exists(self.chdir):
+                raise InterruptExecution(
+                    f"Terraform: chdir [{self.chdir}] does not exists"
+                )
+            if not os.path.isdir(self.chdir):
+                raise InterruptExecution(
+                    f"Terraform: chdir [{self.chdir}] is not a directory"
+                )
+            return f"terraform -chdir={self.chdir}"
+        return "terraform"
 
     def terraform_init(self):
         if not os.path.exists(".terraform"):
             result = subprocess.run(
-                "terraform init",
+                f"{self._terraform} init",
                 capture_output=self.silent,
                 shell=True,
             )
@@ -67,7 +89,7 @@ class Terraform:
         opts = " ".join(var_overrides)
 
         result = subprocess.run(
-            f"terraform apply {opts} -auto-approve",
+            f"{self._terraform} apply {opts} -auto-approve",
             capture_output=self.silent,
             shell=True,
         )
@@ -76,7 +98,7 @@ class Terraform:
 
     def output(self):
         result = subprocess.run(
-            "terraform output -json",
+            f"{self._terraform} output -json",
             shell=True,
             capture_output=True,
             text=True,
@@ -86,7 +108,7 @@ class Terraform:
 
     def destroy(self):
         subprocess.run(
-            "terraform destroy -auto-approve",
+            f"{self._terraform} destroy -auto-approve",
             capture_output=self.silent,
             shell=True,
         )

@@ -78,6 +78,7 @@ controls:
 | --------------------- | ------- |
 | **silent** | Suppress Terraform console output to avoid verbose experiment logs, defaults to `true`|
 | **retain** | Do not run `terraform destroy` at the end of the experiment to retain resources, defaults to `false` |
+| **chdir** | Instruct Terraform to change its working directory before running subcommands |
 
 ## Set Terraform Input Variables
 
