@@ -1,7 +1,7 @@
 [project]
 name = "chaostoolkit-terraform"
 description = "A Chaos Toolkit module to deploy terraform stacks"
-version = "0.0.2"
+version = "0.0.0"
 authors = [ { name = "Manuel Castellin" } ]
 dependencies = [
     'chaostoolkit',

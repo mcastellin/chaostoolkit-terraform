@@ -1,7 +1,7 @@
 name: Release
 on:
   push:
-    branches: [ main ]
+    tags: [ '*' ]
 
 jobs:
   Build:
@@ -11,11 +11,6 @@ jobs:
         with:
           fetch-depth: 0
       - run: ls -laR chaostf/
-
-      - name: Set git context
-        run: |
-          git config --global user.email "build_agent@example.com"
-          git config --global user.name "GitHub Build Agent"
 
       - name: Install dependencies
         run: |
@@ -27,7 +22,7 @@ jobs:
 
       - name: Bump version
         run: |
-          bumpversion patch --tag --commit
+          bumpversion --current-version '0.0.0' --new-version '${{ github.ref_name }}' patch
 
       - name: Run build
         run: python -m build
@@ -38,8 +33,3 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TWINE_TOKEN }}
         run: |
           python -m twine upload dist/*
-
-      - name: Push tag information
-        run: |
-          git push --tags
-
