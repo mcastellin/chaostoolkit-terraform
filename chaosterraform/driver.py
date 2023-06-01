@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 from copy import deepcopy
+from itertools import chain
 from typing import Any, Dict, List
 
 from chaoslib.exceptions import InterruptExecution
@@ -16,6 +17,11 @@ from chaoslib.types import (
     Secrets,
     Settings,
 )
+
+
+def _run(*cmd: List[List[str]], capture_output: bool = False, text: bool = False):
+    _cmd = list(chain(*cmd))
+    return subprocess.run(_cmd, shell=False, capture_output=capture_output, text=text)
 
 
 def singleton(cls):
@@ -33,20 +39,14 @@ def singleton(cls):
 
 @singleton
 class Terraform:
-    def __init__(self):
-        super().__init__()
-        self.retain = False
-        self.silent = False
-        self.chdir = None
-        self.args = {}
-
-    def configure(
+    def __init__(
         self,
         retain: bool = False,
         silent: bool = False,
         chdir: str = None,
         args: Dict = None,
     ):
+        super().__init__()
         self.retain = retain
         self.silent = silent
         self.chdir = chdir
@@ -63,16 +63,12 @@ class Terraform:
                 raise InterruptExecution(
                     f"Terraform: chdir [{self.chdir}] is not a directory"
                 )
-            return f"terraform -chdir={self.chdir}"
-        return "terraform"
+            return ["terraform", f"-chdir={self.chdir}"]
+        return ["terraform"]
 
     def terraform_init(self):
         if not os.path.exists(".terraform"):
-            result = subprocess.run(
-                f"{self._terraform} init",
-                capture_output=self.silent,
-                shell=True,
-            )
+            result = _run(self._terraform, ["init"], capture_output=self.silent)
             if result.returncode != 0:
                 raise InterruptExecution("Failed to initialize terraform")
 
@@ -85,30 +81,27 @@ class Terraform:
             string_value = value
             if isinstance(value, bool):
                 string_value = str(value).lower()
-            var_overrides.append(f"-var {key}='{string_value}'")
-        opts = " ".join(var_overrides)
+            var_overrides.extend(["-var", f"{key}='{string_value}'"])
 
-        result = subprocess.run(
-            f"{self._terraform} apply {opts} -auto-approve",
+        result = _run(
+            self._terraform,
+            ["apply", "-auto-approve"],
+            var_overrides,
             capture_output=self.silent,
-            shell=True,
         )
         if result.returncode != 0:
             raise InterruptExecution("Failed to apply terraform stack terraform")
 
     def output(self):
-        result = subprocess.run(
-            f"{self._terraform} output -json",
-            shell=True,
-            capture_output=True,
-            text=True,
+        result = _run(
+            self._terraform, ["output", "-json"], capture_output=True, text=True
         )
         outputs = json.loads(result.stdout)
         return outputs
 
     def destroy(self):
-        subprocess.run(
-            f"{self._terraform} destroy -auto-approve",
+        _run(
+            self._terraform,
+            ["destroy", "-auto-approve"],
             capture_output=self.silent,
-            shell=True,
         )

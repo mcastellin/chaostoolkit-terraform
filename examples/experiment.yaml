@@ -1,0 +1,16 @@
+title: Example of chaostoolkit-terraform control
+description: Use chaosterraform to deploy terraform code
+
+controls:
+  - name: chaosterraform
+    provider:
+      type: python
+      module: chaosterraform.control
+      arguments:
+        silent: false
+
+steady-state-hypothesis:
+  title: empty
+  probes: []
+
+method: []

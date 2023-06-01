@@ -47,8 +47,7 @@ def configure_control(
         str(params.get("retain")),
     )
 
-    driver = Terraform()
-    driver.configure(**params, args=tf_vars)
+    driver = Terraform(**params, args=tf_vars)
     driver.terraform_init()
 
 
