@@ -4,6 +4,16 @@ A [Chaos Toolkit](https://chaostoolkit.org/) driver to extend chaos experiments 
 
 ## Package Installation
 
+### From Python package index
+
+To install the latest `chaostoolkit-terraform` stable release:
+
+```shell
+pip install -U chaostoolkit-terraform
+```
+
+### Edge version from the GitHub repository
+
 To install the *edge* version of the `chaostoolkit-terraform` package directly from the repository source code:
 
 ```shell

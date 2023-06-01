@@ -1,12 +1,16 @@
 [project]
 name = "chaostoolkit-terraform"
 description = "A Chaos Toolkit module to deploy terraform stacks"
+readme = "README.md"
 version = "0.0.0"
 authors = [ { name = "Manuel Castellin" } ]
 dependencies = [
     'chaostoolkit',
     'chaostoolkit-lib',
 ]
+
+[project.urls]
+homepage = "https://github.com/mcastellin/chaostoolkit-terraform"
 
 [build-system]
 requires = [ "setuptools", "wheel" ]
