@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - run: ls -laR src/
+      - run: ls -laR chaostf/
 
       - name: Set git context
         run: |
