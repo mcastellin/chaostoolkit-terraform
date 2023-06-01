@@ -13,7 +13,7 @@ from logzero import logger
 name = "chaostf"
 __author__ = """Manuel Castellin"""
 __email__ = "manuel@castellinconsulting.com"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __all__ = [
     "discover",
     "__version__",

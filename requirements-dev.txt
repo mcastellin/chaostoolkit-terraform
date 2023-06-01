@@ -1,0 +1,7 @@
+build
+wheel
+twine
+pytest
+pylint
+flake8
+bump2version

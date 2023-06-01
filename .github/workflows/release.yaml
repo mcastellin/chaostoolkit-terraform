@@ -1,0 +1,44 @@
+name: Release
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  Build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: ls -laR src/
+
+      - name: Set git context
+        run: |
+          git config --global user.email "build_agent@example.com"
+          git config --global user.name "GitHub Build Agent"
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: python -m pytest -v
+
+      - name: Bump version
+        run: |
+          bumpversion patch --tag --commit
+
+      - name: Run build
+        run: python -m build
+
+      - name: Publish package
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TWINE_TOKEN }}
+        run: |
+          python -m twine upload dist/*
+
+      - name: Push tag information
+        run: |
+          git push --tags
+
