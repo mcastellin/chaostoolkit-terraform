@@ -1,5 +1,5 @@
-import chaostf
+import chaosterraform
 
 
 def test_version():
-    assert chaostf.__version__ is not None
+    assert chaosterraform.__version__ is not None

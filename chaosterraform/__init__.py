@@ -1,4 +1,4 @@
-"""Top-level package for chaostf"""
+"""Top-level package for chaosterraform"""
 from typing import List
 
 from chaoslib.discovery.discover import (
@@ -10,7 +10,7 @@ from chaoslib.discovery.discover import (
 from chaoslib.types import DiscoveredActivities, Discovery
 from logzero import logger
 
-name = "chaostf"
+name = "chaosterraform"
 __author__ = """Manuel Castellin"""
 __email__ = "manuel@castellinconsulting.com"
 __version__ = "0.0.0"
@@ -22,7 +22,9 @@ __all__ = [
 
 def discover(discover_system: bool = True) -> Discovery:
     # pylint: disable=unused-argument
-    discovery = initialize_discovery_result("chaostf", __version__, "chaostf")
+    discovery = initialize_discovery_result(
+        "chaosterraform", __version__, "chaosterraform"
+    )
     discovery["activities"].extend(load_exported_activities())
     return discovery
 
@@ -32,7 +34,7 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     Extract metadata from actions and probes exposed by this extension.
     """
     activities = []
-    activities.extend(discover_actions("chaostf.actions"))
-    activities.extend(discover_activities("chaostf.control", "control"))
+    activities.extend(discover_actions("chaosterraform.actions"))
+    activities.extend(discover_activities("chaosterraform.control", "control"))
 
     return activities

@@ -20,5 +20,5 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = [ "." ]
-include = ["chaostf*"]
+include = ["chaosterraform*"]
 exclude = ["tests*"]

@@ -22,7 +22,7 @@ pip install -U "git+https://github.com/mcastellin/chaostoolkit-terraform.git#egg
 
 ## Usage
 
-**chaostoolkit-terraform** provides a control to deploy terraform modules. To activate the `chaostf.control` for your experiments
+**chaostoolkit-terraform** provides a control to deploy terraform modules. To activate the `chaosterraform.control` for your experiments
 you need to define it in your experiment files (or settings):
 
 ```yaml
@@ -33,14 +33,14 @@ controls:
   - name: "Deploy Terraform module"
     provider:
       type: python
-      module: chaostf.control
+      module: chaosterraform.control
 
 steady-state-hypothesis: {...}
 
 method: []
 ```
 
-By default the `chaostf.control` will reference the Terraform module found in the current working directory.
+By default the `chaosterraform.control` will reference the Terraform module found in the current working directory.
 
 The control will execute Terraform command in the following phases of the experiment execution:
 
@@ -60,7 +60,7 @@ controls:
   - name: "Deploy Terraform module"
     provider:
       type: python
-      module: chaostf.control
+      module: chaosterraform.control
       arguments:
         silent: false
         retain: true
@@ -69,7 +69,7 @@ controls:
 **Configuration using Ctk parameters**
 ```yaml
 configuration:
-# parameters prefixed with `tf_conf__` will configure chaostf driver
+# parameters prefixed with `tf_conf__` will configure chaosterraform driver
   tf_conf__silent: false
   tf_conf__retain: true
 
@@ -77,7 +77,7 @@ controls:
   - name: "Deploy Terraform module"
     provider:
       type: python
-      module: chaostf.control
+      module: chaosterraform.control
 ```
 
 > When both options are supplied **configuration parameters supplied via the experiment configuration will
@@ -106,7 +106,7 @@ controls:
   - name: "Deploy Terraform module"
     provider:
       type: python
-      module: chaostf.control
+      module: chaosterraform.control
 ```
 
 
@@ -134,7 +134,7 @@ controls:
   - name: "Deploy Terraform module"
     provider:
       type: python
-      module: chaostf.control
+      module: chaosterraform.control
 
 steady-state-hypothesis:
   title: "Application is available"
