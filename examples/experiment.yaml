@@ -2,6 +2,7 @@ title: Example of chaostoolkit-terraform control
 description: Use chaosterraform to deploy terraform code
 
 configuration:
+  # Override Terraform input variable `restart` when applying the stack
   tf__restart: "always"
 
 controls:
@@ -10,6 +11,8 @@ controls:
       type: python
       module: chaosterraform.control
       arguments:
+        # For demonstration, ask chaosterraform to retain the created
+        # resources after the experiment
         retain: true
 
 steady-state-hypothesis:
@@ -20,6 +23,8 @@ steady-state-hypothesis:
       tolerance: 200
       provider:
         type: http
+        # Terraform output variables can be used as configuration
+        # variables in the experiment template with the ${tf_out__} notation
         url: "http://localhost:${tf_out__container_port}/"
         method: GET
         timeout: 3
