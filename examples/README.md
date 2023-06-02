@@ -1,6 +1,22 @@
 # Chaostoolkit Terraform Example
 
-This example uses `chaostoolkit-terraform` to automatically handle resource deployment before the experiments tarts and tear down the stack after the experiment is finished.
+This example uses `chaostoolkit-terraform` to automatically handle resource deployment before the experiment starts and tear down the stack after the experiment is finished.
+
+## Running the experiment
+
+To run this experiment make sure the `chaostoolkit` and `chaostoolkit-terraform` Python modules are installed in your system:
+
+```shell
+pip install -U chaostoolkit chaostoolkit-terraform
+```
+
+Then to run the experiment:
+
+```shell
+chaos run experiment.yaml
+```
+
+## The infrastructure template
 
 The **main.tf** template uses the Docker Terraform provider to run an Nginx container in the host system.
 
@@ -31,4 +47,34 @@ resource "docker_container" "nginx" {
     external = var.local_port
   }
 }
+```
+
+## The Chaos Toolkit experiment
+
+The experiment in **experiment.yaml** is a simple Chaos Toolkit template to check if the Nginx webserver can survive an abrupt termination.
+
+The experiment method uses a **process** probe to send the termination command to the running container and hypothesise that the webserver will still be responding at http://localhost:8000 after a short pause.
+
+```yaml
+steady-state-hypothesis:
+  title: "check-service-online"
+  probes:
+    - name: "service-should-respond"
+      type: probe
+      tolerance: 200
+      provider:
+        type: http
+        url: "http://localhost:${tf_out__container_port}/"
+        method: GET
+        timeout: 3
+
+method:
+  - name: "terminate-nginx-service"
+    type: action
+    provider:
+      type: process
+      path: "docker"
+      arguments: "exec ${tf_out__container_name} nginx -s quit"
+    pauses:
+      after: 5
 ```
