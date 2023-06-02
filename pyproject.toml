@@ -22,3 +22,13 @@ include-package-data = false
 where = [ "." ]
 include = ["chaosterraform*"]
 exclude = ["tests*"]
+
+[tool.black]
+line-length = 120
+
+[tool.pylint]
+max-line-length = 120
+disable = """
+   invalid-name,
+   too-many-arguments,
+""" 

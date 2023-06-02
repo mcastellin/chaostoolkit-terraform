@@ -30,6 +30,7 @@ def test_init_default_args(mocked_run):
         shell=False,
         capture_output=True,
         text=False,
+        check=False,
     )
 
 
@@ -45,6 +46,7 @@ def test_apply_default_args(mocked_run):
         shell=False,
         capture_output=False,
         text=False,
+        check=False,
     )
 
 
@@ -60,6 +62,7 @@ def test_apply_verbose(mocked_run):
         shell=False,
         capture_output=True,
         text=False,
+        check=False,
     )
 
 
@@ -74,6 +77,7 @@ def test_destroy_default_args(mocked_run):
         shell=False,
         capture_output=False,
         text=False,
+        check=False,
     )
 
 
@@ -90,6 +94,7 @@ def test_output_strings(mocked_run):
         shell=False,
         capture_output=True,
         text=True,
+        check=False,
     )
     assert result.get("expected") == "value"
     assert result.get("one") == "1"

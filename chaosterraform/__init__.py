@@ -1,14 +1,8 @@
 """Top-level package for chaosterraform"""
 from typing import List
 
-from chaoslib.discovery.discover import (
-    discover_actions,
-    discover_activities,
-    discover_probes,
-    initialize_discovery_result,
-)
+from chaoslib.discovery.discover import discover_actions, discover_activities, initialize_discovery_result
 from chaoslib.types import DiscoveredActivities, Discovery
-from logzero import logger
 
 name = "chaosterraform"
 __author__ = """Manuel Castellin"""
@@ -21,10 +15,9 @@ __all__ = [
 
 
 def discover(discover_system: bool = True) -> Discovery:
+    """Discover chaostoolkit activities"""
     # pylint: disable=unused-argument
-    discovery = initialize_discovery_result(
-        "chaosterraform", __version__, "chaosterraform"
-    )
+    discovery = initialize_discovery_result("chaosterraform", __version__, "chaosterraform")
     discovery["activities"].extend(load_exported_activities())
     return discovery
 

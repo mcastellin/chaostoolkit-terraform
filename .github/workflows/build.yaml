@@ -21,3 +21,6 @@ jobs:
 
       - name: Run tests
         run: python -m pytest -v
+
+      - name: Run linting
+        run: python -m pylint chaosterraform/

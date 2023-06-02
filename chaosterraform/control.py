@@ -1,16 +1,10 @@
-from typing import Any, Dict, List
+"""
+Terraform control module
 
-from chaoslib.exceptions import InterruptExecution
-from chaoslib.types import (
-    Activity,
-    Configuration,
-    Experiment,
-    Hypothesis,
-    Journal,
-    Run,
-    Secrets,
-    Settings,
-)
+This module allows Chaos Toolkit users to create infrastructure resources using Terraform scripts
+for the experiment execution.
+"""
+from chaoslib.types import Configuration, Experiment, Journal, Secrets, Settings
 from logzero import logger
 
 from .driver import Terraform
@@ -23,11 +17,30 @@ EXPORT_VAR_PREFIX = "tf_out__"
 def configure_control(
     silent: bool = True,
     retain: bool = False,
+    chdir: str = None,
     configuration: Configuration = None,
     secrets: Secrets = None,
     settings: Settings = None,
     experiment: Experiment = None,
 ):
+    """
+    Configure terraform control for the experiment execution
+
+    Parameters
+    ----------
+    silent: bool
+        suppress Terraform logs in ChaosToolkit experiment logs
+    retain: bool
+        retain created resources at the end of the experiment
+    chdir: str
+        change the Terraform working directory
+
+    Raises
+    ------
+    InterruptExecution
+        If terraform init fails we interrupt the experiment execution immediately
+    """
+    # pylint: disable=unused-argument
     tf_vars = {}
     if configuration:
         for key, value in configuration.items():
@@ -41,6 +54,7 @@ def configure_control(
     params = {
         "retain": bool(configuration.get(f"{CONFIG_PREFIX}retain", retain)),
         "silent": bool(configuration.get(f"{CONFIG_PREFIX}silent", silent)),
+        "chdir": configuration.get(f"{CONFIG_PREFIX}chdir", chdir),
     }
     logger.info(
         "Terraform: retain stack after experiment completion: %s",
@@ -60,9 +74,15 @@ def before_experiment_control(
     """
     before-control of the experiment's execution
 
-    Called by the Chaos Toolkit before the experiment's begin but after the
-    configuration and secrets have been loaded.
+    Apply the Terraform stack before the experiment execution. As the experiment did not start
+    yet, if the resources creation fails the execution is interrupted immediately.
+
+    Raises
+    ------
+    InterruptExecution
+        interrupts the experiment execution if resources creation fails
     """
+    # pylint: disable=unused-argument
     driver = Terraform()
     logger.info("Terraform: creating required resources for experiment")
     driver.apply()
@@ -78,11 +98,16 @@ def after_experiment_control(
     secrets: Secrets = None,
     **kwargs,
 ):
+    """
+    after-control of the experiment's execution
+
+    Destroy resources after the experiment execution unless retain specifically requested by
+    the experiment using the `retain` parameter
+    """
+    # pylint: disable=unused-argument
     driver = Terraform()
     if not driver.retain:
         logger.info("Terraform: removing experiment resources")
         driver.destroy()
     else:
-        logger.info(
-            "Terraform: stack resources will be retained after experiment completion."
-        )
+        logger.info("Terraform: stack resources will be retained after experiment completion.")
