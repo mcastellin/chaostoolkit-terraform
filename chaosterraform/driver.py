@@ -6,9 +6,9 @@ import subprocess
 from copy import deepcopy
 from itertools import chain
 from typing import Dict, List
-from logzero import logger
 
 from chaoslib.exceptions import InterruptExecution
+from logzero import logger
 
 
 def _run(*cmd: List[List[str]], capture_output: bool = False, text: bool = False):
