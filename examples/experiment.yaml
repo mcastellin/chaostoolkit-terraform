@@ -1,16 +1,41 @@
 title: Example of chaostoolkit-terraform control
 description: Use chaosterraform to deploy terraform code
 
+configuration:
+  # Override Terraform input variable `restart` when applying the stack
+  tf__restart: "always"
+
 controls:
   - name: chaosterraform
     provider:
       type: python
       module: chaosterraform.control
       arguments:
-        silent: false
+        # For demonstration, ask chaosterraform to retain the created
+        # resources after the experiment
+        retain: true
 
 steady-state-hypothesis:
-  title: empty
-  probes: []
+  title: "check-service-online"
+  probes:
+    - name: "service-should-respond"
+      type: probe
+      tolerance: 200
+      provider:
+        type: http
+        # Terraform output variables can be used as configuration
+        # variables in the experiment template with the ${tf_out__} notation
+        url: "http://localhost:${tf_out__container_port}/"
+        method: GET
+        timeout: 3
 
-method: []
+method:
+  - name: "terminate-nginx-service"
+    type: action
+    provider:
+      type: process
+      path: "docker"
+      arguments: "exec ${tf_out__container_name} nginx -s quit"
+    pauses:
+      after: 5
+
