@@ -56,7 +56,7 @@ in the Chaos Toolkit experiment template using the `tf_out__` variable prefix.
 
 The experiment in **experiment.yaml** is a simple Chaos Toolkit template to check if the Nginx webserver can survive an abrupt termination.
 
-The `chaosterraform control` is configured for this experiment:
+The **chaosterraform control** is configured for this experiment:
 
 ```yaml
 # ./experiment.yaml
@@ -83,10 +83,13 @@ Using the experiment **configuration** section, we provide an override value for
 terraform apply -var restart=always -auto-approve
 ```
 
+### Method and hypothesis
 
-The experiment method uses a **process** probe to send the termination command to the running container and hypothesise that the webserver will still be responding at http://localhost:8000 after a short pause.
+The experiment method uses a **process** probe to send the termination signal to the running Nginx container and hypothesise that the webserver will still be responding at http://localhost:8000 after a short pause.
 
 ```yaml
+# ./experiment.yaml
+
 steady-state-hypothesis:
   title: "check-service-online"
   probes:
@@ -109,3 +112,5 @@ method:
     pauses:
       after: 5
 ```
+
+`container_name` and `container_port` are output variables exported by the Terraform template and accessible in the Chaos Toolkit experiment using variable replacement, respectively with `${tf_out__container_name}` and `${tf_out__container_port}`.
