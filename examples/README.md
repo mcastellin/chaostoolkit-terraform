@@ -4,13 +4,13 @@ This example uses `chaostoolkit-terraform` to automatically handle resource depl
 
 ## Running the experiment
 
-To run this experiment make sure the `chaostoolkit` and `chaostoolkit-terraform` Python modules are installed in your system:
+Make sure `chaostoolkit` and `chaostoolkit-terraform` Python modules are installed in your system:
 
 ```shell
 pip install -U chaostoolkit chaostoolkit-terraform
 ```
 
-Then to run the experiment:
+Then, to run the experiment:
 
 ```shell
 chaos run experiment.yaml
@@ -18,7 +18,7 @@ chaos run experiment.yaml
 
 ## The infrastructure template
 
-The **main.tf** template uses the Docker Terraform provider to run an Nginx container in the host system.
+The **main.tf** template uses the Docker Terraform provider to run an Nginx container in the host system:
 
 ```terraform
 # ./main.tf
@@ -49,9 +49,40 @@ resource "docker_container" "nginx" {
 }
 ```
 
+Application container name and exposed port are exported as Terraform output parameters and can be accessed
+in the Chaos Toolkit experiment template using the `tf_out__` variable prefix.
+
 ## The Chaos Toolkit experiment
 
 The experiment in **experiment.yaml** is a simple Chaos Toolkit template to check if the Nginx webserver can survive an abrupt termination.
+
+The `chaosterraform control` is configured for this experiment:
+
+```yaml
+# ./experiment.yaml
+
+configuration:
+  tf__restart: "always"
+
+controls:
+  - name: chaosterraform
+    provider:
+      type: python
+      module: chaosterraform.control
+      arguments:
+        retain: true
+```
+
+The `chaosterraform.control` will initialize and apply the Terraform template before the experiment.
+
+For demonstration, the control is configured to retain the created resources after the experiment. To automatically destroy resources you can change control arguments to `retain: false`.
+
+Using the experiment **configuration** section, we provide an override value for the `restart` variable in the **main.tf** using `tf__restart: "always"`. This is the same as running terraform apply with the `-var` option:
+
+```shell
+terraform apply -var restart=always -auto-approve
+```
+
 
 The experiment method uses a **process** probe to send the termination command to the running container and hypothesise that the webserver will still be responding at http://localhost:8000 after a short pause.
 
