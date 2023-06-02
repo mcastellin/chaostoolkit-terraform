@@ -6,6 +6,7 @@ import subprocess
 from copy import deepcopy
 from itertools import chain
 from typing import Dict, List
+from logzero import logger
 
 from chaoslib.exceptions import InterruptExecution
 
@@ -87,6 +88,8 @@ class Terraform:
         if not os.path.exists(".terraform"):
             result = _run(self._terraform, ["init"], capture_output=self.silent)
             if result.returncode != 0:
+                if self.silent:
+                    logger.error(result.stderr.decode("utf-8"))
                 raise InterruptExecution("Failed to initialize terraform")
 
     def apply(self, **kwargs):
@@ -112,7 +115,7 @@ class Terraform:
             string_value = value
             if isinstance(value, bool):
                 string_value = str(value).lower()
-            var_overrides.extend(["-var", f"{key}='{string_value}'"])
+            var_overrides.extend(["-var", f"{key}={string_value}"])
 
         result = _run(
             self._terraform,
@@ -121,6 +124,8 @@ class Terraform:
             capture_output=self.silent,
         )
         if result.returncode != 0:
+            if self.silent:
+                logger.error(result.stderr.decode("utf-8"))
             raise InterruptExecution("Failed to apply terraform stack terraform")
 
     def output(self):
