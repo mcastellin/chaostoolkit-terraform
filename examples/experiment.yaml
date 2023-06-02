@@ -10,7 +10,6 @@ controls:
       type: python
       module: chaosterraform.control
       arguments:
-        silent: true
         retain: true
 
 steady-state-hypothesis:

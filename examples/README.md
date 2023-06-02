@@ -1,11 +1,11 @@
-terraform {
-  required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.0"
-    }
-  }
-}
+# Chaostoolkit Terraform Example
+
+This example uses `chaostoolkit-terraform` to automatically handle resource deployment before the experiments tarts and tear down the stack after the experiment is finished.
+
+The **main.tf** template uses the Docker Terraform provider to run an Nginx container in the host system.
+
+```terraform
+# ./main.tf
 
 variable "local_port" {
   type    = number
@@ -14,10 +14,6 @@ variable "local_port" {
 variable "restart" {
   type    = string
   default = "no"
-}
-
-provider "docker" {
-  host = "unix:///var/run/docker.sock"
 }
 
 resource "docker_image" "nginx" {
@@ -35,11 +31,4 @@ resource "docker_container" "nginx" {
     external = var.local_port
   }
 }
-
-output "container_name" {
-  value = docker_container.nginx.name
-}
-
-output "container_port" {
-  value = var.local_port
-}
+```
