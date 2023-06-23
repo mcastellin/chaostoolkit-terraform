@@ -3,7 +3,7 @@ description: Use chaosterraform to deploy terraform code
 
 configuration:
   # Override Terraform input variable `restart` when applying the stack
-  tf__restart: "always"
+  restart_policy: "always"
 
 controls:
   - name: chaosterraform
@@ -14,6 +14,11 @@ controls:
         # For demonstration, ask chaosterraform to retain the created
         # resources after the experiment
         retain: true
+        silent: true
+        variables:
+          restart:
+            name: restart_policy
+          local_port: 8080
 
 steady-state-hypothesis:
   title: "check-service-online"

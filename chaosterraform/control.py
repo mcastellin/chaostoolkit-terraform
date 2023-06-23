@@ -4,12 +4,14 @@ Terraform control module
 This module allows Chaos Toolkit users to create infrastructure resources using Terraform scripts
 for the experiment execution.
 """
+from typing import Any, List
+
+from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, Experiment, Journal, Secrets, Settings
 from logzero import logger
 
 from .driver import Terraform
 
-VAR_NAME_PREFIX = "tf__"
 CONFIG_PREFIX = "tf_conf__"
 EXPORT_VAR_PREFIX = "tf_out__"
 
@@ -18,6 +20,7 @@ def configure_control(
     silent: bool = True,
     retain: bool = False,
     chdir: str = None,
+    variables: List = None,
     configuration: Configuration = None,
     secrets: Secrets = None,
     settings: Settings = None,
@@ -42,14 +45,9 @@ def configure_control(
     """
     # pylint: disable=unused-argument
     tf_vars = {}
-    if configuration:
-        for key, value in configuration.items():
-            if key.startswith(VAR_NAME_PREFIX):
-                tf_key = key.replace(VAR_NAME_PREFIX, "")
-                tf_vars[tf_key] = value
-
-    for key, _ in tf_vars.items():
-        configuration.pop(f"{VAR_NAME_PREFIX}{key}")
+    if variables:
+        for key, value in variables.items():
+            tf_vars[key] = _resolve_variable(configuration, key, value)
 
     params = {
         "retain": bool(configuration.get(f"{CONFIG_PREFIX}retain", retain)),
@@ -111,3 +109,17 @@ def after_experiment_control(
         driver.destroy()
     else:
         logger.info("Terraform: stack resources will be retained after experiment completion.")
+
+
+def _resolve_variable(configuration, key, value) -> Any:
+    if isinstance(value, dict):
+        if "name" not in value:
+            raise InterruptExecution(f"Terraform: parameter {key} should specify either a value or a 'name' key.")
+
+        parameter_name = value["name"]
+        if parameter_name not in configuration:
+            raise InterruptExecution(f"Terraform: could not resolve value for variable {key} in configuration")
+
+        return configuration[parameter_name]
+
+    return value

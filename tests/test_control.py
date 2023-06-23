@@ -1,4 +1,6 @@
+import pytest
 from unittest.mock import patch
+from chaoslib.exceptions import InterruptExecution
 from chaosterraform import control
 
 
@@ -14,20 +16,59 @@ def test_configure_control_with_parameters(mocked_driver):
 @patch("chaosterraform.control.Terraform", autospec=True)
 def test_configure_control_with_terraform_variables(mocked_driver):
     configuration = {
-        "tf__variable_str": "sg-00001111",
-        "tf__one_more_bool_var": True,
-        "tf__numeric": 1.2,
-    }
-
-    control.configure_control(configuration=configuration)
-
-    expected_variables = {
         "variable_str": "sg-00001111",
         "one_more_bool_var": True,
         "numeric": 1.2,
     }
 
+    variables = {
+        "one": {"name": "variable_str"},
+        "two": {"name": "one_more_bool_var"},
+        "three": {"name": "numeric"},
+        "four": "direct-value-assignment",
+    }
+
+    control.configure_control(variables=variables, configuration=configuration)
+
+    expected_variables = {
+        "one": "sg-00001111",
+        "two": True,
+        "three": 1.2,
+        "four": "direct-value-assignment",
+    }
+
     mocked_driver.assert_called_once_with(silent=True, retain=False, chdir=None, args=expected_variables)
+
+
+@patch("chaosterraform.control.Terraform", autospec=True)
+def test_configure_control_with_wrong_configuration(mocked_driver):
+    configuration = {
+        "numeric": 1.2,
+    }
+
+    variables = {
+        "three": {"__name": "numeric"},
+        "four": "direct-value-assignment",
+    }
+
+    with pytest.raises(InterruptExecution):
+        control.configure_control(variables=variables, configuration=configuration)
+
+
+@patch("chaosterraform.control.Terraform", autospec=True)
+def test_configure_control_with_missing_configuration(mocked_driver):
+    configuration = {
+        "numeric": 1.2,
+    }
+
+    variables = {
+        "one": {"name": "missing"},
+        "three": {"name": "numeric"},
+        "four": "direct-value-assignment",
+    }
+
+    with pytest.raises(InterruptExecution):
+        control.configure_control(variables=variables, configuration=configuration)
 
 
 @patch("chaosterraform.control.Terraform", autospec=True)

@@ -66,7 +66,7 @@ controls:
         retain: true
 ```
 
-**Configuration using Ctk parameters**
+**Configuration using Chaos Toolkit parameters**
 ```yaml
 configuration:
 # parameters prefixed with `tf_conf__` will configure chaosterraform driver
@@ -90,16 +90,29 @@ controls:
 | **retain** | Do not run `terraform destroy` at the end of the experiment to retain resources, defaults to `false` |
 | **chdir** | Instruct Terraform to change its working directory before running subcommands |
 
-## Set Terraform Input Variables
+## Provide Input Variables for Terraform
 
-You can override input variables defined in the Terraform module from within the experiment using
-Chaos Toolkit configuration parameters prefixed by `tf__`:
+You can override input variables defined in the Terraform module from within the experiment using the `variables`
+argument for the control:
+
+```yaml
+controls:
+  - name: "Deploy Terraform module"
+    provider:
+      type: python
+      module: chaosterraform.control
+      arguments:
+        variables:
+          vpc_id: "vpc-0000000000"
+          number_of_azs: 2
+```
+
+Alternatively, you can supply input variables from Chaos Toolkit configuration by referencing a parameter name
+already defined in Chaos Toolkit configuration:
 
 ```yaml
 configuration:
-# parameters prefixed with `tf__` will set terraform input variables for the module
-  tf__vpc_id: "vpc-0000000000"
-  tf__number_of_azs: 2
+  env_name: "live"
   ...
 
 controls:
@@ -107,8 +120,11 @@ controls:
     provider:
       type: python
       module: chaosterraform.control
+      arguments:
+        variables:
+          environment:
+            name: "env_name"
 ```
-
 
 ## Use Terraform Outputs In Chaos Experiments
 
