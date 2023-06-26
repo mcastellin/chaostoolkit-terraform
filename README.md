@@ -1,4 +1,4 @@
-# chaostoolkit-terraform
+# ChaosToolkit Terraform
 
 A [Chaos Toolkit](https://chaostoolkit.org/) driver to extend chaos experiments with [Terraform](https://www.terraform.io/)
 
