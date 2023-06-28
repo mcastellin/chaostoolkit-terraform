@@ -59,12 +59,14 @@ class Terraform:
         silent: bool = False,
         chdir: str = None,
         args: Dict = None,
+        outputs: Dict = None,
     ):
         super().__init__()
         self.retain = retain
         self.silent = silent
         self.chdir = chdir
         self.args = args or {}
+        self.outputs = outputs or {}
 
     @property
     def _terraform(self):
