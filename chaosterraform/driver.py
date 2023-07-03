@@ -46,6 +46,8 @@ class Terraform:
         is interrupted with an InterruptExecution exception
     args: Dict
         Terraform variables overrides
+    output_config: Dict
+        Configuration to map Terraform output to configuration variables
 
     Raises
     ------
@@ -59,14 +61,14 @@ class Terraform:
         silent: bool = False,
         chdir: str = None,
         args: Dict = None,
-        outputs: Dict = None,
+        output_config: Dict = None,
     ):
         super().__init__()
         self.retain = retain
         self.silent = silent
         self.chdir = chdir
         self.args = args or {}
-        self.outputs = outputs or {}
+        self.output_config = output_config or {}
 
     @property
     def _terraform(self):

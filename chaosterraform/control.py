@@ -4,7 +4,7 @@ Terraform control module
 This module allows Chaos Toolkit users to create infrastructure resources using Terraform scripts
 for the experiment execution.
 """
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 
 from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, Experiment, Journal, Secrets, Settings
@@ -38,6 +38,10 @@ def configure_control(
         retain created resources at the end of the experiment
     chdir: str
         change the Terraform working directory
+    variables: List
+        input variables configuration for Terraform
+    outputs: Dict
+       configuration to map Terraform outputs to ChaosToolkit variables
 
     Raises
     ------
@@ -60,7 +64,7 @@ def configure_control(
         str(params.get("retain")),
     )
 
-    driver = Terraform(**params, args=tf_vars, outputs=outputs)
+    driver = Terraform(**params, args=tf_vars, output_config=outputs)
     driver.terraform_init()
 
 
@@ -88,8 +92,8 @@ def before_experiment_control(
     for key, value in driver.output().items():
         logger.info("Terraform: reading configuration value for [%s]", key)
         configuration[f"{EXPORT_VAR_PREFIX}{key}"] = value.get("value")
-        if key in driver.outputs:
-            export_name = driver.outputs[key]
+        if key in driver.output_config:
+            export_name = driver.output_config[key]
             configuration[export_name] = value.get("value")
 
 

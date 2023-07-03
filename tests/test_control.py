@@ -8,7 +8,9 @@ from chaosterraform import control
 def test_configure_control_with_parameters(mocked_driver):
     control.configure_control(silent=False, retain=True, chdir="../testfolder/one", configuration={})
 
-    mocked_driver.assert_called_once_with(silent=False, retain=True, chdir="../testfolder/one", args={})
+    mocked_driver.assert_called_once_with(
+        silent=False, retain=True, chdir="../testfolder/one", args={}, output_config=None
+    )
     mock_instance = mocked_driver.return_value
     mock_instance.terraform_init.assert_called()
 
@@ -37,7 +39,9 @@ def test_configure_control_with_terraform_variables(mocked_driver):
         "four": "direct-value-assignment",
     }
 
-    mocked_driver.assert_called_once_with(silent=True, retain=False, chdir=None, args=expected_variables)
+    mocked_driver.assert_called_once_with(
+        silent=True, retain=False, chdir=None, args=expected_variables, output_config=None
+    )
 
 
 @patch("chaosterraform.control.Terraform", autospec=True)
@@ -81,7 +85,9 @@ def test_configure_control_configuration_override(mocked_driver):
 
     control.configure_control(silent=True, retain=False, chdir="some/folder", configuration=configuration)
 
-    mocked_driver.assert_called_once_with(silent=False, retain=True, chdir="my/other/folder/path", args={})
+    mocked_driver.assert_called_once_with(
+        silent=False, retain=True, chdir="my/other/folder/path", args={}, output_config=None
+    )
 
 
 @patch("chaosterraform.control.Terraform", autospec=True)
