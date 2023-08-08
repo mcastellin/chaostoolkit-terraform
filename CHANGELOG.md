@@ -3,7 +3,7 @@
 
 ## [0.0.9][]
 
-[0.0.9]: https://github.com/mcastellin/chaostoolkit-terraform/compare/0.0.9..0.0.8
+[0.0.9]: https://github.com/mcastellin/chaostoolkit-terraform/compare/0.0.8..0.0.9
 
 ### Added
 - Added option for variables override in Terraform template
