@@ -15,10 +15,19 @@ controls:
         # resources after the experiment
         retain: true
         silent: true
+
         variables:
+          # references the existing Chaos Toolkit configuration "restart_policy"
           restart:
             name: restart_policy
+          # direct value assignment for Terraform stack variable
           local_port: 8080
+
+        outputs:
+          # export a new variable in Chaos Toolkit configuration called
+          # "created_container_name" with the Terraform output value for "container_name"
+          container_name: "created_container_name"
+
 
 steady-state-hypothesis:
   title: "check-service-online"
@@ -34,13 +43,14 @@ steady-state-hypothesis:
         method: GET
         timeout: 3
 
+
 method:
   - name: "terminate-nginx-service"
     type: action
     provider:
       type: process
       path: "docker"
-      arguments: "exec ${tf_out__container_name} nginx -s quit"
+      # Using custom variable ${created_container_name} exported using the "outputs" parameter
+      arguments: "exec ${created_container_name} nginx -s quit"
     pauses:
       after: 5
-

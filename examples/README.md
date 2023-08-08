@@ -49,8 +49,7 @@ resource "docker_container" "nginx" {
 }
 ```
 
-Application container name and exposed port are exported as Terraform output parameters and can be accessed
-in the Chaos Toolkit experiment template using the `tf_out__` variable prefix.
+After the stack creation, container name and exposed port are exported as Terraform output parameters and can be accessed from the Chaos Toolkit experiment template as variables using the `tf_out__` variable prefix or mapped to custom variables using the `outputs` attribute for the control.
 
 ## The Chaos Toolkit experiment
 
@@ -62,7 +61,7 @@ The **chaosterraform control** is configured for this experiment:
 # ./experiment.yaml
 
 configuration:
-  tf__restart: "always"
+  restart_policy: "always"
 
 controls:
   - name: chaosterraform
@@ -71,21 +70,30 @@ controls:
       module: chaosterraform.control
       arguments:
         retain: true
+        silent: true
+        variables:
+          restart:
+            name: restart_policy
+          local_port: 8080
+        outputs:
+          container_name: "created_container_name"
 ```
 
 The `chaosterraform.control` will initialize and apply the Terraform template before the experiment.
 
-For demonstration, the control is configured to retain the created resources after the experiment. To automatically destroy resources you can change control arguments to `retain: false`.
+For demonstration, the control is configured to retain the created resources after the experiment. To automatically destroy resources you can change control argument to `retain: false`.
 
-Using the experiment **configuration** section, we provide an override value for the `restart` variable in the **main.tf** using `tf__restart: "always"`. This is the same as running terraform apply with the `-var` option:
+Using the experiment **variables** attribute, we provide an override value for the Terraform variables `restart` and `local_port` defined in the **main.tf**. This is the same as running terraform apply with the `-var` option:
 
 ```shell
-terraform apply -var restart=always -auto-approve
+terraform apply -var restart=always -var local_port=8080 -auto-approve
 ```
+
+When defining values for the Terraform stack you can either use a direct value assignment or reference an existing variable already provided by the Chaos Toolkit configuration by specifying a variable `name` (see example above).
 
 ### Method and hypothesis
 
-The experiment method uses a **process** probe to send the termination signal to the running Nginx container and hypothesise that the webserver will still be responding at http://localhost:8000 after a short pause.
+The experiment method uses a **process** probe to send the termination signal to the running Nginx container and hypothesise that the webserver will still be responding at http://localhost:8080 after a short pause.
 
 ```yaml
 # ./experiment.yaml
@@ -108,9 +116,25 @@ method:
     provider:
       type: process
       path: "docker"
-      arguments: "exec ${tf_out__container_name} nginx -s quit"
+      arguments: "exec ${created_container_name} nginx -s quit"
     pauses:
       after: 5
 ```
 
 `container_name` and `container_port` are output variables exported by the Terraform template and accessible in the Chaos Toolkit experiment using variable replacement, respectively with `${tf_out__container_name}` and `${tf_out__container_port}`.
+
+In this example we also asked `chaosterraform` to export the `container_name` output value into a custom variable called `created_container_name` using the `outputs` property:
+
+```yaml
+# ./experiment.yaml
+
+controls:
+  - name: chaosterraform
+    provider:
+      type: python
+      module: chaosterraform.control
+      arguments:
+          ...
+        outputs:
+          container_name: "created_container_name"
+```

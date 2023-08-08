@@ -22,8 +22,9 @@ pip install -U "git+https://github.com/mcastellin/chaostoolkit-terraform.git#egg
 
 ## Usage
 
-**chaostoolkit-terraform** provides a control to deploy terraform modules. To activate the `chaosterraform.control` for your experiments
-you need to define it in your experiment files (or settings):
+**chaostoolkit-terraform** provides a control to deploy Terraform modules. The control will automatically create the resources defined in the Terraform stack before experiment execution and destroy them once the experiment is completed.
+
+To activate the `chaosterraform.control` for your experiments you need to define it in your experiment files (or settings):
 
 ```yaml
 title: My experiment
@@ -46,7 +47,7 @@ The control will execute Terraform command in the following phases of the experi
 
 | Phase                 | Actions |
 | --------------------- | ------- |
-| **Configure control** | Initialize the Terraform driver |
+| **Configure control** | Initialize the Terraform driver in Chaos Toolkit|
 | **Before experiment** | Initialize and apply the selected Terraform module |
 | **After experiment**  | Run terraform destroy unless specifically asked to retain the created resources |
 
@@ -80,7 +81,7 @@ controls:
       module: chaosterraform.control
 ```
 
-> When both options are supplied **configuration parameters supplied via the experiment configuration will
+> When both options are provided **configuration parameters supplied via the experiment configuration will
 > be used**.
 
 
@@ -88,12 +89,11 @@ controls:
 | --------------------- | ------- |
 | **silent** | Suppress Terraform console output to avoid verbose experiment logs, defaults to `true`|
 | **retain** | Do not run `terraform destroy` at the end of the experiment to retain resources, defaults to `false` |
-| **chdir** | Instruct Terraform to change its working directory before running subcommands |
+| **chdir** | Instruct Terraform to change its working directory |
 
 ## Provide Input Variables for Terraform
 
-You can override input variables defined in the Terraform module from within the experiment using the `variables`
-argument for the control:
+You can override input variables defined in the Terraform module from within the experiment using the `variables` argument for the control:
 
 ```yaml
 controls:
@@ -107,8 +107,7 @@ controls:
           number_of_azs: 2
 ```
 
-Alternatively, you can supply input variables from Chaos Toolkit configuration by referencing a parameter name
-already defined in Chaos Toolkit configuration:
+Alternatively, you can provide input variables from Chaos Toolkit configuration by referencing a parameter name already defined in Chaos Toolkit configuration:
 
 ```yaml
 configuration:
@@ -164,3 +163,18 @@ steady-state-hypothesis:
         method: "GET"
         timeout: 3
 ```
+
+In addition, we can ask the `chaosterraform.control` to map Terraform output values to new Chaos Toolkit configuration variables or override existing ones using the `outputs` argument:
+
+```yaml
+controls:
+  - name: "Deploy Terraform module"
+    provider:
+      type: python
+      module: chaosterraform.control
+      arguments:
+        outputs:
+            alb_dns_name: "application_dns_name"
+```
+
+In the example above, the control will map the output value `alb_dns_name` into a new Chaos Toolkit configuration `application_dns_name` that can be referenced in the experiment template using the `${application_dns_name}` notation.

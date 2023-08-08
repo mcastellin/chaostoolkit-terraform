@@ -80,6 +80,20 @@ class Terraform:
             return ["terraform", f"-chdir={self.chdir}"]
         return ["terraform"]
 
+    def _get_var_overrides(self, args=None):
+        _args = deepcopy(self.args)
+        if args:
+            _args.update(args)
+
+        var_overrides = []
+        for key, value in _args.items():
+            string_value = str(value)
+            if isinstance(value, bool):
+                string_value = str(value).lower()
+            var_overrides.extend(["-var", f"{key}={string_value}"])
+
+        return var_overrides
+
     def terraform_init(self):
         """
         Initialize Terraform modules
@@ -111,15 +125,7 @@ class Terraform:
             Interrupts the experiment execution if the Terraform stack failed to create
         """
 
-        args = deepcopy(self.args)
-        args.update(kwargs)
-
-        var_overrides = []
-        for key, value in args.items():
-            string_value = value
-            if isinstance(value, bool):
-                string_value = str(value).lower()
-            var_overrides.extend(["-var", f"{key}={string_value}"])
+        var_overrides = self._get_var_overrides(kwargs)
 
         result = _run(
             self._terraform,
@@ -149,8 +155,10 @@ class Terraform:
         """
         Destroy the resources created by the Terraform stack
         """
+        var_overrides = self._get_var_overrides()
         _run(
             self._terraform,
             ["destroy", "-auto-approve"],
+            var_overrides,
             capture_output=self.silent,
         )

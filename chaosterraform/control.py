@@ -20,7 +20,7 @@ def configure_control(
     silent: bool = True,
     retain: bool = False,
     chdir: str = None,
-    variables: List = None,
+    variables: Dict = None,
     outputs: Dict = None,
     configuration: Configuration = None,
     secrets: Secrets = None,
@@ -35,13 +35,14 @@ def configure_control(
     silent: bool
         suppress Terraform logs in ChaosToolkit experiment logs
     retain: bool
-        retain created resources at the end of the experiment
+        retain created resources after the end of the experiment
     chdir: str
         change the Terraform working directory
-    variables: List
+    variables: Dict
         input variables configuration for Terraform
     outputs: Dict
-       configuration to map Terraform outputs to ChaosToolkit variables
+       defines how to map Terraform outputs to ChaosToolkit variables. By default
+       output values are always mapped using the "tf_out__" prefix.
 
     Raises
     ------
