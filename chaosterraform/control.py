@@ -4,7 +4,7 @@ Terraform control module
 This module allows Chaos Toolkit users to create infrastructure resources using Terraform scripts
 for the experiment execution.
 """
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from chaoslib.exceptions import InterruptExecution
 from chaoslib.types import Configuration, Experiment, Journal, Secrets, Settings
