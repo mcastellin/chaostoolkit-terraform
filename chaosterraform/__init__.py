@@ -1,7 +1,7 @@
 """Top-level package for chaosterraform"""
 from typing import List
 
-from chaoslib.discovery.discover import discover_actions, discover_activities, initialize_discovery_result
+from chaoslib.discovery.discover import discover_activities, initialize_discovery_result
 from chaoslib.types import DiscoveredActivities, Discovery
 
 name = "chaosterraform"
@@ -27,7 +27,6 @@ def load_exported_activities() -> List[DiscoveredActivities]:
     Extract metadata from actions and probes exposed by this extension.
     """
     activities = []
-    activities.extend(discover_actions("chaosterraform.actions"))
     activities.extend(discover_activities("chaosterraform.control", "control"))
 
     return activities
